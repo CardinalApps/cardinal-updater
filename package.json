@@ -1,0 +1,16 @@
+{
+  "name": "hydra-updater",
+  "version": "0.1.0",
+  "author": "somebeaver",
+  "private": true,
+  "scripts": {
+    "test": "tap"
+  },
+  "devDependencies": {
+    "electron": "^7.3.1"
+  },
+  "dependencies": {
+    "electron-updater": "^4.2.5",
+    "hydra-i18n": "github:somebeaver/hydra-i18n"
+  }
+}
