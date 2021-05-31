@@ -29,6 +29,12 @@ exports.checkForUpdates = async (silent) => {
     _silent = silent
   }
 
+  // if the env provides a flag, check it
+  if ('HYDRA_IS_UPDATING' in process.env) {
+    console.warn('Refusing to update because process.env.HYDRA_IS_UPDATING is set to true')
+    return
+  }
+
   // ask the user to download the update
   try {
     await autoUpdater.checkForUpdates()
@@ -104,5 +110,16 @@ autoUpdater.on('download-progress', (progressObj) => {
  * Download done.
  */
 autoUpdater.on('update-downloaded', (info) => {
+  // if the env provides an updating flag and we are not currently updating,
+  // enable it. the flag is not required. it is currently only used by the
+  // server app to disable the Confirm Quit dialogue, which breaks the update
+  // flow if the user can't close it quick enough
+  if ('HYDRA_IS_UPDATING' in process.env) {
+    if (process.env.HYDRA_IS_UPDATING) console.warn('How is the update flag true at this point?')
+    
+    // set the flag and let the update proceed
+    process.env.HYDRA_IS_UPDATING = true
+  }
+
   autoUpdater.quitAndInstall()
 })
