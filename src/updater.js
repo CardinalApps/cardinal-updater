@@ -6,6 +6,7 @@ const i18n = require('hydra-i18n')
 autoUpdater.autoDownload = false
 
 let _silent = false
+let db = null
 
 //autoUpdater.logger = log
 //autoUpdater.logger.transports.file.level = 'info'
@@ -13,7 +14,7 @@ let _silent = false
 /**
  * Call this to manually trigger the update flow, including the dialog box.
  */
-exports.checkForUpdates = async (silent) => {
+exports.checkForUpdates = async (silent, dbRef) => {
   // try to get info about a potential update
   // try {
   //   let updateInfo = await autoUpdater.getUpdateInfoAndProvider()
@@ -24,6 +25,9 @@ exports.checkForUpdates = async (silent) => {
   //   console.log(err)
   //   return false
   // }
+
+  // cache db instance
+  db = dbRef
 
   if (silent !== undefined) {
     _silent = silent
@@ -57,6 +61,13 @@ autoUpdater.on('update-available', async (info) => {
 
   if (answer.response === 0) {
     console.log('Update accepted by user')
+
+    try {
+      if (db instanceof DatabaseService) {
+        await db.setOption('skip_next_quit_confirm', 1)
+      }
+    } catch (err) { console.warn(err) }
+
     autoUpdater.downloadUpdate()
   } else {
     console.log('Update postponed by user')
@@ -104,16 +115,5 @@ autoUpdater.on('download-progress', (progressObj) => {
  * Download done.
  */
 autoUpdater.on('update-downloaded', (info) => {
-  // if the env provides an updating flag and we are not currently updating,
-  // enable it. the flag is not required. it is currently only used by the
-  // server app to disable the Confirm Quit dialogue, which breaks the update
-  // flow if the user can't close it quick enough
-  if ('HYDRA_IS_UPDATING' in process.env) {
-    if (process.env.HYDRA_IS_UPDATING) console.warn('How is the update flag true at this point?')
-    
-    // set the flag and let the update proceed
-    process.env.HYDRA_IS_UPDATING = true
-  }
-
   autoUpdater.quitAndInstall()
 })
