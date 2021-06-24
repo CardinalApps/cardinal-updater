@@ -29,12 +29,6 @@ exports.checkForUpdates = async (silent) => {
     _silent = silent
   }
 
-  // if the env provides a flag, check it
-  if ('HYDRA_IS_UPDATING' in process.env && process.env.HYDRA_IS_UPDATING === true) {
-    console.warn('Refusing to update because process.env.HYDRA_IS_UPDATING is set to true')
-    return
-  }
-
   // ask the user to download the update
   try {
     await autoUpdater.checkForUpdates()
